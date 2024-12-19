@@ -1,0 +1,103 @@
+// Import required modules
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const app = express();
+const port = 3000;
+
+// Middleware
+app.use(bodyParser.json());
+app.use(cors());
+
+// Mock database
+const users = [];
+const cvTemplates = [
+    { id: 1, name: "Modern Template" },
+    { id: 2, name: "Classic Template" },
+    { id: 3, name: "Creative Template" },
+];
+const jobs = [
+    { id: 1, title: "Frontend Developer", profession: "IT" },
+    { id: 2, title: "Graphic Designer", profession: "Design" },
+    { id: 3, title: "Project Manager", profession: "Management" },
+];
+const messages = [
+    { from: "John Doe", to: "exampleUser", content: "Hello, how are you?" },
+    { from: "Jane Smith", to: "exampleUser", content: "Don't forget the meeting tomorrow." },
+];
+const notifications = [
+    { user: "exampleUser", message: "Your CV has been viewed 5 times today." },
+    { user: "exampleUser", message: "New job matching your skills has been posted." },
+];
+
+// Routes
+
+// Home route
+app.get('/', (req, res) => {
+    res.send('Welcome to ProForge API');
+});
+
+// User registration
+app.post('/register', (req, res) => {
+    const { username, password } = req.body;
+    if (users.find(user => user.username === username)) {
+        return res.status(400).json({ message: 'User already exists' });
+    }
+    users.push({ username, password });
+    res.status(201).json({ message: 'User registered successfully' });
+});
+
+// User login
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+    const user = users.find(u => u.username === username && u.password === password);
+    if (!user) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    res.status(200).json({ message: 'Login successful', user });
+});
+
+// Fetch CV templates
+app.get('/cv-templates', (req, res) => {
+    res.status(200).json(cvTemplates);
+});
+
+// Fetch jobs based on profession
+app.get('/jobs', (req, res) => {
+    const { profession } = req.query;
+    if (profession) {
+        const filteredJobs = jobs.filter(job => job.profession.toLowerCase() === profession.toLowerCase());
+        return res.status(200).json(filteredJobs);
+    }
+    res.status(200).json(jobs);
+});
+
+// Fetch messages for a user
+app.get('/messages', (req, res) => {
+    const { user } = req.query;
+    const userMessages = messages.filter(msg => msg.to === user);
+    res.status(200).json(userMessages);
+});
+
+// Fetch notifications for a user
+app.get('/notifications', (req, res) => {
+    const { user } = req.query;
+    const userNotifications = notifications.filter(notification => notification.user === user);
+    res.status(200).json(userNotifications);
+});
+
+// Save CV data
+app.post('/save-cv', (req, res) => {
+    const { username, cvData } = req.body;
+    const user = users.find(u => u.username === username);
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+    user.cv = cvData;
+    res.status(201).json({ message: 'CV saved successfully', cv: user.cv });
+});
+
+// Start server
+app.listen(port, () => {
+    console.log(`ProForge API running at http://localhost:${port}`);
+});
