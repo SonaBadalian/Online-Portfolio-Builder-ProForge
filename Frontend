@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProForge</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f4f4f4;
+            padding: 10px 20px;
+        }
+        header .logo {
+            color: green;
+            font-size: 24px;
+        }
+        header nav a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: blue;
+        }
+        section {
+            padding: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">ProForge</div>
+        <nav>
+            <a href="#" id="about-link">About Us</a>
+            <a href="#" id="jobs-link">Jobs</a>
+            <a href="#" id="messages-link">Messages</a>
+            <a href="#" id="notifications-link">Notifications</a>
+        </nav>
+    </header>
+
+    <section id="about-us" class="hidden">
+        <h2>About Us</h2>
+        <p>ProForge is a platform designed to help professionals forge their career paths by creating stunning CVs and portfolios. Our mission is to make career growth accessible to everyone.</p>
+    </section>
+
+    <section id="jobs" class="hidden">
+        <h2>Jobs</h2>
+        <div id="jobs-for-you">
+            <p>Loading jobs...</p>
+        </div>
+    </section>
+
+    <section id="messages" class="hidden">
+        <h2>Messages</h2>
+        <div id="messages-container">
+            <p>Loading messages...</p>
+        </div>
+    </section>
+
+    <section id="notifications" class="hidden">
+        <h2>Notifications</h2>
+        <div id="notifications-container">
+            <p>Loading notifications...</p>
+        </div>
+    </section>
+
+    <script>
+        // Navigation Handlers
+        document.getElementById('about-link').addEventListener('click', () => {
+            showSection('about-us');
+        });
+        document.getElementById('jobs-link').addEventListener('click', () => {
+            showSection('jobs');
+            loadJobs('IT'); // Example profession: IT
+        });
+        document.getElementById('messages-link').addEventListener('click', () => {
+            showSection('messages');
+            loadMessages('exampleUser');
+        });
+        document.getElementById('notifications-link').addEventListener('click', () => {
+            showSection('notifications');
+            loadNotifications('exampleUser');
+        });
+
+        // Show the selected section and hide others
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('section');
+            sections.forEach(section => {
+                if (section.id === sectionId) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
+            });
+        }
+
+        // Fetch jobs based on user's profession
+        function loadJobs(profession) {
+            fetch(`http://localhost:3000/jobs?profession=${profession}`)
+                .then(response => response.json())
+                .then(jobs => {
+                    const jobsForYou = document.getElementById('jobs-for-you');
+                    jobsForYou.innerHTML = '';
+                    jobs.forEach(job => {
+                        const jobElement = document.createElement('div');
+                        jobElement.textContent = job.title;
+                        jobsForYou.appendChild(jobElement);
+                    });
+                })
+                .catch(err => console.error('Error loading jobs:', err));
+        }
+
+        // Fetch user messages
+        function loadMessages(username) {
+            fetch(`http://localhost:3000/messages?user=${username}`)
+                .then(response => response.json())
+                .then(messages => {
+const messagesContainer = document.getElementById('messages-container');
+                    messagesContainer.innerHTML = '';
+                    messages.forEach(msg => {
+                        const messageElement = document.createElement('p');
+                        messageElement.textContent = ${msg.from}: ${msg.content};
+                        messagesContainer.appendChild(messageElement);
+                    });
+                })
+                .catch(err => console.error('Error loading messages:', err));
+        }
+
+        // Fetch notifications for the user
+        function loadNotifications(username) {
+            fetch(`http://localhost:3000/notifications?user=${username}`)
+                .then(response => response.json())
+                .then(notifications => {
+                    const notificationsContainer = document.getElementById('notifications-container');
+                    notificationsContainer.innerHTML = '';
+                    notifications.forEach(notification => {
+                        const notificationElement = document.createElement('div');
+                        notificationElement.textContent = notification.message;
+                        notificationsContainer.appendChild(notificationElement);
+                    });
+                })
+                .catch(err => console.error('Error loading notifications:', err));
+        }
+    </script>
+</body>
+</html>
